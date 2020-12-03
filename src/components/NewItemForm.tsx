@@ -13,9 +13,15 @@ interface NewItemFormProps {
 const NewItemForm = ({ onAdd }: NewItemFormProps) => {
   const [text, setText] = useState("");
   const inputRef = useFocus();
+  const handleAddText = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      onAdd(text);
+    }
+  };
   return (
     <NewItemFormContainer>
       <NewItemInput
+        onKeyPress={handleAddText}
         ref={inputRef}
         value={text}
         onChange={event => setText(event.target.value)}
