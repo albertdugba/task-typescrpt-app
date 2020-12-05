@@ -1,7 +1,18 @@
-import React, { createContext } from "react";
+import React, { createContext, useContext, useReducer } from "react";
+import { nanoid } from "nanoid";
 
+type Action =
+  | {
+      type: "ADD_LIST";
+      payload: string;
+    }
+  | {
+      type: "ADD_TASK";
+      payload: { text: string; listId: string };
+    };
 interface AppStateContextProps {
   state: AppState;
+  dispatch: React.Dispatch<Action>;
 }
 
 const appData: AppState = {
@@ -35,6 +46,7 @@ interface List {
   tasks: Task[];
 }
 
+export const useAppState = () => useContext(AppStateContext);
 export interface AppState {
   lists: List[];
 }
@@ -43,9 +55,34 @@ const AppStateContext = createContext<AppStateContextProps>(
   {} as AppStateContextProps
 );
 
+const appStateReducer = (state: AppState, action: Action): AppState => {
+  switch (action.type) {
+    case "ADD_LIST": {
+      return {
+        ...state,
+        lists: [
+          ...state.lists,
+          {
+            id: nanoid(),
+            tasks: [],
+            text: action.payload,
+          },
+        ],
+      };
+    }
+
+    case "ADD_TASK":
+      return { ...state };
+
+    default:
+      return state;
+  }
+};
+
 export const AppStateProvider = ({ children }: React.PropsWithChildren<{}>) => {
+  const [state, dispatch] = useReducer(appStateReducer, appData);
   return (
-    <AppStateContext.Provider value={{ state: appData }}>
+    <AppStateContext.Provider value={{ state, dispatch }}>
       {children}
     </AppStateContext.Provider>
   );
