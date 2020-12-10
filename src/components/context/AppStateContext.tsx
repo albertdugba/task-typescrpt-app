@@ -5,7 +5,7 @@ import {
   overrideItemAtIndex,
   moveItem,
 } from "../utils/arrayUtils";
-import { DragItem } from "../../DragItem";
+import { DragItem } from "../DragItem";
 
 type Action =
   | {
@@ -39,7 +39,7 @@ const appData: AppState = {
     {
       id: "1",
       text: "In Progress",
-      tasks: [{ id: "c2", text: "Write unit test" }],
+      tasks: [{ id: "c2", text: "Write unit tests" }],
     },
     {
       id: "2",
@@ -66,9 +66,6 @@ export interface AppState {
 }
 
 export const useAppState = () => useContext(AppStateContext);
-export interface AppState {
-  lists: List[];
-}
 
 const AppStateContext = createContext<AppStateContextProps>(
   {} as AppStateContextProps
