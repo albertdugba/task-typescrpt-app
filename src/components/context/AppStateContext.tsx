@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useReducer } from "react";
 import { nanoid } from "nanoid";
+import {
+  findItemIndexById,
+  overrideItemAtIndex,
+  moveItem,
+} from "../utils/arrayUtils";
+import { DragItem } from "../../DragItem";
 
 type Action =
   | {
@@ -9,6 +15,14 @@ type Action =
   | {
       type: "ADD_TASK";
       payload: { text: string; listId: string };
+    }
+  | {
+      type: "MOVE_LIST";
+      payload: { dragIndex: number; hoverIndex: number };
+    }
+  | {
+      type: "SET_DRAGGED_ITEM";
+      payload: DragItem | undefined;
     };
 interface AppStateContextProps {
   state: AppState;
@@ -23,12 +37,12 @@ const appData: AppState = {
       tasks: [{ id: "c0", text: "Integrate Paystack payment" }],
     },
     {
-      id: "2",
+      id: "1",
       text: "In Progress",
       tasks: [{ id: "c2", text: "Write unit test" }],
     },
     {
-      id: "3",
+      id: "2",
       text: "Done",
       tasks: [{ id: "c3", text: "Prepare to deploy" }],
     },
@@ -44,6 +58,11 @@ interface List {
   id: string;
   text: string;
   tasks: Task[];
+}
+
+export interface AppState {
+  lists: List[];
+  draggedItem: DragItem | undefined;
 }
 
 export const useAppState = () => useContext(AppStateContext);
@@ -71,8 +90,41 @@ const appStateReducer = (state: AppState, action: Action): AppState => {
       };
     }
 
-    case "ADD_TASK":
-      return { ...state };
+    case "ADD_TASK": {
+      const targetListIndex = findItemIndexById(
+        state.lists,
+        action.payload.listId
+      );
+
+      const targetList = state.lists[targetListIndex];
+      const updatedTargetList = {
+        ...targetList,
+        tasks: [
+          ...targetList.tasks,
+          { id: nanoid(), text: action.payload.text },
+        ],
+      };
+      return {
+        ...state,
+        lists: overrideItemAtIndex(
+          state.lists,
+          updatedTargetList,
+          targetListIndex
+        ),
+      };
+    }
+
+    case "MOVE_LIST": {
+      const { dragIndex, hoverIndex } = action.payload;
+      return {
+        ...state,
+        lists: moveItem(state.lists, dragIndex, hoverIndex),
+      };
+    }
+
+    case "SET_DRAGGED_ITEM": {
+      return { ...state, draggedItem: action.payload };
+    }
 
     default:
       return state;

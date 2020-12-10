@@ -2,15 +2,16 @@ import React from "react";
 import { ColumnContainer, ColumnTitle } from "../styles/styles";
 import AddNewItem from "./AddNewItem";
 import Card from "./Card";
-import { AppStateProvider, useAppState } from "./context/AppStateContext";
+import { useAppState } from "./context/AppStateContext";
 
 interface ColumnProps {
-  text?: string;
+  text: string;
   index: number;
+  id: string;
 }
 
-const Column = ({ text, index }: ColumnProps) => {
-  const { state } = useAppState();
+const Column = ({ text, index, id }: ColumnProps) => {
+  const { state, dispatch } = useAppState();
   return (
     <ColumnContainer>
       <ColumnTitle>{text}</ColumnTitle>
@@ -19,7 +20,9 @@ const Column = ({ text, index }: ColumnProps) => {
       ))}
       <AddNewItem
         toggleButtonText="+Add another task"
-        onAdd={console.log}
+        onAdd={text =>
+          dispatch({ type: "ADD_TASK", payload: { text, listId: id } })
+        }
         dark
       />
     </ColumnContainer>
